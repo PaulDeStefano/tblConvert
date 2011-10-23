@@ -12,6 +12,9 @@ Of course, in order to make comparisons or calcuations with the data, it is
 often necesssary to reconstruct all of the original values.  So, this program 
 helps quickly transform value differences to raw values and vice-versa.
 
+### Source Code URI
+http://github.com/PaulDeStefano/tblConvert
+
 ### Copyright 2011 Paul DeStefano
 >   This program is free software: you can redistribute it and/or modify
 >   it under the terms of the GNU General Public License as published by
