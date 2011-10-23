@@ -16,6 +16,7 @@
 #      VERSION:  1.0
 #      CREATED:  10/11/2011 11:31:23 AM
 #     REVISION:  ---
+#   SOURCE URI:  http://github.com/PaulDeStefano/tblConvert
 #      LICENSE:  GPL3
 #
 #   Copyright 2011 Paul DeStefano
