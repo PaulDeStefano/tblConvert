@@ -131,14 +131,12 @@ sub strToNum {
 
   # clean value as much as possible
   $num =~ s/[^\w.-]+//g ;
-  # try to convert to number
-  $num = $num - 0;
-
-  if( $num eq "-0" ) {
-    return undef ;
+  if( $num =~ m/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/ ) {
+    # is a number
+    return $num - 0;
   }
 
-  return $num ;
+  return undef ;
 }
 
 sub parseInst {
@@ -238,7 +236,7 @@ sub processInput {
   # calculate it with what we already have stored.
 
   my @inputFields = keys %{$catRef->{inMap}} ;
-  if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields from inMap: ",Dumper(\@inputFields),"\n" ); }
+  if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields from inMap: ",join( ':' , @inputFields),"\n" ); }
 
   # process single char fields, first
   my $i = undef ;
@@ -251,11 +249,11 @@ sub processInput {
   }
   
   @inputFields = grep { ! m/^\w$/ } @inputFields ;
-  if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields remaining: ",Dumper(\@inputFields),"\n" ); }
+  if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields remaining: ",join( ':' , @inputFields),"\n" ); }
 
   # process the rest until we cannot calculate more things
   while( @inputFields ) {
-    if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields remaining: ",Dumper(\@inputFields),"\n" ); }
+    if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields remaining: ",join( ':' , @inputFields),"\n" ); }
     for my $field ( @inputFields ) {
       if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: working on field $field ","\n" ); }
       # always store this value
