@@ -11,7 +11,7 @@
 # REQUIREMENTS:  ---
 #         BUGS:  ---
 #        NOTES:  ---
-#       AUTHOR:  Porcelain Mouse
+#       AUTHOR:  Paul DeStefano
 #      COMPANY:  
 #      VERSION:  1.0
 #      CREATED:  10/11/2011 11:31:23 AM
@@ -40,7 +40,7 @@ use Data::Dumper ;
 use Getopt::Long ;
 
 my %OPT = (
-  debug     => 4  ,
+  debug     => 0  ,
   params    => 0 ,
   delim     => "," ,
   skip      => 0 ,
