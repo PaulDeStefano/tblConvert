@@ -41,11 +41,12 @@ use Data::Dumper ;
 use Getopt::Long ;
 
 my %OPT = (
-  debug     => 0  ,
+  debug     => 1  ,
   params    => 0 ,
   delim     => "," ,
   skip      => 0 ,
   points    => undef ,
+#  nomangle  => undef ,
 );
 
 sub showHelp {
@@ -131,10 +132,11 @@ sub strToNum {
   my $num = $s ;
 
   # clean value as much as possible
-  $num =~ s/[^\w.-]+//g ;
+  $num =~ s/^[^\d.-]+//g ;
+  $num =~ s/[^\d.-]+$//g ;
   if( $num =~ m/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/ ) {
     # is a number
-    return $num - 0;
+    return $num * 1;
   }
 
   return undef ;
@@ -247,13 +249,25 @@ sub processInput {
     $i = $catRef->{inMap}{$field} ;
     $val = $catRef->{inRec}[$i] ;
     $values{$field} = $val ;
+    if($OPT{debug}>4) { print( STDERR "DEBUG: processing input: $field = $values{$field} ","\n" ); }
   }
   
   @inputFields = grep { ! m/^\w$/ } @inputFields ;
   if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields remaining: ",join( ':' , @inputFields),"\n" ); }
 
   # process the rest until we cannot calculate more things
+  my @oldList ;
   while( @inputFields ) {
+    # endless loop prevention: we should make progress on each pass, so if
+    # inputFields does not change on each pass, break out.
+    # So, compare the list with the last pass
+    if ( @oldList == @inputFields ) {
+      if($OPT{debug}>0) { print( STDERR "WARNING processing input: finished without resolving all calcuations","\n" ); }
+      last ;
+    } else {
+      @oldList = @inputFields ;
+    }
+    
     if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: fields remaining: ",join( ':' , @inputFields),"\n" ); }
     for my $field ( @inputFields ) {
       if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: working on field $field ","\n" ); }
@@ -279,6 +293,7 @@ sub processInput {
             if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: failed for $field ","\n" ); }
           }
         } else {
+          if($OPT{debug}>3) { print( STDERR "DEBUG: processing input: cannot calculate field $field because $o1 & $o2 are unknown","\n" ); }
           # cannot calculate
         }
       }
@@ -371,16 +386,18 @@ sub recToStr {
           if($OPT{debug}>3) { print( STDERR "DEBUG: recToStr: f=$f","\n" ); }
           # if it's a float...
           if( $f =~ m/\.[0-9]/ ) {
-            if( $points ) {
+            if( defined $points ) {
               # and points are set, use fixed precision
-              $string .= sprintf( "%${delim}.${points}f" , $f );
+              $string .= sprintf( "%-${delim}.${points}f" , $f );
             } else {
               # otherwise, just fit inside fixed-width field
-              $string .= sprintf( "%${delim}G" , $f );
+              # print out as delim-1 total digits (delim less 1 char for decimal point)
+              my $digits = $delim - 1;
+              $string .= sprintf( "%-${delim}.${digits}G" , $f );
             }
           } else {
             # not a float, just print in fixed-width field
-            $string .= sprintf( "%${delim}s" , $f );
+            $string .= sprintf( "%-${delim}s" , $f );
           }
         }
         last;
@@ -394,6 +411,7 @@ sub recToStr {
 
   }
 
+  if($OPT{debug}>4) { print( STDERR "DEBUG: recToStr: string=$string","\n" ); }
   return $string;
 
 }
@@ -412,6 +430,7 @@ GetOptions( 's|skip=i'          => \$OPT{skip} ,
             'h|help'            => \$OPT{showHelp} ,
             'i|inputlabel=s'    => \$OPT{input} ,
             'o|outputlabel=s'   => \$OPT{output} ,
+#            'm|nomangle=s'      => \$OPT{nomangle} ,
 #            'b|blank|ignore=s'  => \$OPT{ignore} ,
 );
 
